@@ -45,6 +45,7 @@ public class AppointmentDAO {
             ps.setString(4, appointment.getAppointmentType());
             // Converting ZonedDateTime to Timestamp for Database Storage
             ps.setTimestamp(5, Timestamp.from(appointment.getAppointmentStart().toInstant()));
+            
             // Converting ZonedDateTime to Timestamp for Database Storage
             ps.setTimestamp(6, Timestamp.from(appointment.getAppointmentEnd().toInstant()));
             ps.setString(7, appointment.getCreatedBy());
