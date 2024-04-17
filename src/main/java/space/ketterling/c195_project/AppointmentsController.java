@@ -6,6 +6,7 @@ import model.Appointment;
 import model.Contact;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.collections.ObservableList;
@@ -22,6 +23,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 
 import model.SessionManager;
@@ -57,13 +60,30 @@ public class AppointmentsController extends BaseController {
     private TextField searchBar;
     @FXML
     private Label messageLabel;
-    
+    @FXML
+    private DatePicker filterDatePicker;
     // Selected Appointment on TableView
     private static Appointment selectedAppointment;
     
     // Allows other controllers to grab what was selected
     public static Appointment getAppointmentToModify(){
         return selectedAppointment;
+    }
+    
+    /**
+     * Handles when the date picker receives a date to filter
+     * 
+     */
+    @FXML
+    void filterTableByDate(){
+        LocalDate selectedDate = filterDatePicker.getValue();
+        if (selectedDate != null) {
+            populateTableViewWithDateFilter(selectedDate);
+        } else {
+            populateTableView();
+            // if empty just loads table
+        }
+        
     }
     
     /**
@@ -114,6 +134,16 @@ public class AppointmentsController extends BaseController {
     }
     
     /**
+     * Helper button, to show users how to use the Date Picker Filter
+     * 
+     * @param event 
+     */
+    @FXML
+    void helperInfo(ActionEvent event) {
+        displayAlert(33);
+    }
+    
+    /**
      * Handles Deleting Selected Appointment
      * must have an appointment selected
      * @param event 
@@ -124,10 +154,20 @@ public class AppointmentsController extends BaseController {
         if (selectedAppointment == null) {
             displayAlert(16);
         } else {
-
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Alert");
-            alert.setContentText("Do you want to DELETE the selected Appointment?");
+            if("fr".equals(SessionManager.getInstance().getCurrentLanguage())){
+                alert.setTitle("Confirmation de suppression de rendez-vous");
+                alert.setContentText("Voulez-vous SUPPRIMER le rendez-vous sélectionné ?\n\n" +
+                                    "Titre du rendez-vous : " + selectedAppointment.getAppointmentTitle() + "\n" +
+                                    "ID du rendez-vous : " + selectedAppointment.getAppointmentID() + "\n" +
+                                    "Type de rendez-vous : " + selectedAppointment.getAppointmentType());
+            } else {
+                alert.setTitle("Appointment Deletion Confirmation");
+                alert.setContentText("Do you want to DELETE the selected Appointment?\n\n" +
+                                "Appointment Title: " + selectedAppointment.getAppointmentTitle() + "\n" +
+                                "Appointment ID: " + selectedAppointment.getAppointmentID() + "\n" +
+                                "Appointment Type: " + selectedAppointment.getAppointmentType());
+            }
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -135,16 +175,17 @@ public class AppointmentsController extends BaseController {
                 try {
                     if(AppointmentDAO.deleteAppointment(selectedAppointment.getAppointmentID())){
                         displayAlert(22);
-                        
+                        //displays success if true
                     } else {
                         displayAlert(23);
+                        //displays failure if false
                     }
                 } catch(SQLException e) {
                    e.printStackTrace();
                    displayAlert(26);
                 
                 }
-                populateTableView();
+                populateTableView(); //Updates the table view post deletion
             }
         }
     }
@@ -167,7 +208,40 @@ public class AppointmentsController extends BaseController {
     private void populateTableView() {
         try {
             ObservableList<Appointment> appointments = AppointmentDAO.getAllAppointments();
+            System.out.println("test: "+appointments);
             appointmentTableView.setItems(appointments);
+            appointmentTableView.refresh();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            displayAlert(25);
+        }
+    }
+    
+    /**
+     * Works much like populateTableView() except this on takes in a date in the future and finds all
+     * the appointments between now and then
+     * 
+     * @param endDate End of search time
+     */
+    private void populateTableViewWithDateFilter(LocalDate selectedDate) {
+        try {
+            ObservableList<Appointment> allAppointments = AppointmentDAO.getAllAppointments();
+            ObservableList<Appointment> filteredAppointments = FXCollections.observableArrayList();
+
+            // Setup to work either in the past or future. if old date is provided, will filter towards the past
+            // if future date is provided, will filter to the future
+            LocalDate today = LocalDate.now(); // todays date
+            LocalDate startDate = selectedDate.isBefore(today) ? selectedDate : today;
+            LocalDate endDate = selectedDate.isAfter(today) ? selectedDate : today;
+
+            for (Appointment appointment : allAppointments) {
+                LocalDate appointmentDate = appointment.getAppointmentStart().toLocalDate();
+                if (!appointmentDate.isBefore(startDate) && !appointmentDate.isAfter(endDate)) {
+                    filteredAppointments.add(appointment);
+                }
+            }
+
+            appointmentTableView.setItems(filteredAppointments);
             appointmentTableView.refresh();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -180,19 +254,24 @@ public class AppointmentsController extends BaseController {
      * 
      */
     private void setupDateTimeColumns() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z");
+        // im using lower case z but GMT printed out like upper case Z .. date time formatter
 
         // Converting the object's ZonedDateTime to users local time as a String
         // Second use of Lambda , this time to set the formatted zonedDateTimes into each cell
         startDT.setCellValueFactory(cellData -> {
             ZonedDateTime startZdt = cellData.getValue().getAppointmentStart();
-            return new ReadOnlyStringWrapper(startZdt.withZoneSameInstant(ZoneId.systemDefault()).format(formatter));
+            return new ReadOnlyStringWrapper(startZdt.format(formatter));
         });
 
         endDT.setCellValueFactory(cellData -> {
             ZonedDateTime endZdt = cellData.getValue().getAppointmentEnd();
-            return new ReadOnlyStringWrapper(endZdt.withZoneSameInstant(ZoneId.systemDefault()).format(formatter));
+            //System.out.println("Original End: " + endZdt + ", Local End: " + localEnd);
+            return new ReadOnlyStringWrapper(endZdt.format(formatter));
         });
+        
+        
+
     }
     
     /**
@@ -215,18 +294,28 @@ public class AppointmentsController extends BaseController {
      * 
      */
     private void checkForUpcomingAppointments() {
+        String languageCode = SessionManager.getInstance().getCurrentLanguage();
         try {
             List<Appointment> upcomingAppointments = AppointmentDAO.getAppointmentsWithin15Minutes();
             if (!upcomingAppointments.isEmpty()) {
                 Appointment nextAppointment = upcomingAppointments.get(0);
-                messageLabel.setText("Upcoming Meeting, appt ID: "
-                        + nextAppointment.getAppointmentID()
-                        + ", Start Time: "
-                        + nextAppointment.getAppointmentStart().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z"))
-                        + ", End Time: "
-                        + nextAppointment.getAppointmentEnd().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z"))+".");
+                if("fr".equals(languageCode)){
+                    messageLabel.setText("Prochaine réunion, ID de rdv : " + nextAppointment.getAppointmentID()
+                        + "\nHeure de début : " + nextAppointment.getAppointmentStart().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z"))
+                        + ",  Heure de fin : " + nextAppointment.getAppointmentEnd().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z")) + ".");
+
+                } else {
+                    messageLabel.setText("Upcoming Meeting, appt ID: " + nextAppointment.getAppointmentID()
+                        + "\nStart Time: " + nextAppointment.getAppointmentStart().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z"))
+                        + ",  End Time: " + nextAppointment.getAppointmentEnd().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z"))+".");
+                }
             } else {
-                messageLabel.setText("No upcoming appointments within the next 15 minutes.");
+                if("fr".equals(languageCode)){
+                    messageLabel.setText("Aucun rendez-vous prévu dans les 15 prochaines minutes.");
+
+                } else {
+                    messageLabel.setText("No upcoming appointments within the next 15 minutes.");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
