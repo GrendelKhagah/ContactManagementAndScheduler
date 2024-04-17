@@ -2,6 +2,7 @@
 
 <?import java.net.URL?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -12,45 +13,45 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="677.0" prefWidth="907.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.ketterling.c195_project.AppointmentsController">
+<AnchorPane id="AnchorPane" prefHeight="677.0" prefWidth="1106.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.ketterling.c195_project.AppointmentsController">
     <stylesheets>
         <URL value="@/styles/loginform.css" />
     </stylesheets>
    <children>
-      <TableView fx:id="appointmentTableView" layoutX="14.0" layoutY="88.0" prefHeight="575.0" prefWidth="757.0">
+      <TableView fx:id="appointmentTableView" layoutX="14.0" layoutY="88.0" prefHeight="575.0" prefWidth="962.0">
         <columns>
-          <TableColumn fx:id="appointmentID" prefWidth="46.0" text="%appointmentID" />
-          <TableColumn fx:id="appointmentTitle" prefWidth="107.0" text="%appointmentTitle" />
-            <TableColumn fx:id="appointmentDescription" prefWidth="159.0" text="%description" />
-            <TableColumn fx:id="appointmentLocation" prefWidth="93.0" text="%location" />
-            <TableColumn fx:id="appointmentContact" prefWidth="73.0" text="%contact" />
-            <TableColumn fx:id="startDT" prefWidth="72.0" text="%startDT" />
-            <TableColumn fx:id="endDT" prefWidth="62.0" text="%endDT" />
-            <TableColumn fx:id="Customer_ID" prefWidth="69.0" text="%Customer_ID" />
-            <TableColumn fx:id="User_ID" prefWidth="75.0" text="%User_ID" />
+          <TableColumn fx:id="appointmentID" prefWidth="58.44446086883545" text="%appointmentID" />
+          <TableColumn fx:id="appointmentTitle" prefWidth="118.44441223144531" text="%appointmentTitle" />
+            <TableColumn fx:id="appointmentDescription" prefWidth="158.88890075683594" text="%description" />
+            <TableColumn fx:id="appointmentLocation" prefWidth="89.11117553710938" text="%location" />
+            <TableColumn fx:id="appointmentContact" prefWidth="113.55551147460938" text="%contact" />
+            <TableColumn fx:id="startDT" prefWidth="140.22222900390625" text="%startDT" />
+            <TableColumn fx:id="endDT" prefWidth="136.66668701171875" text="%endDT" />
+            <TableColumn fx:id="Customer_ID" prefWidth="80.888916015625" text="%Customer_ID" />
+            <TableColumn fx:id="User_ID" prefWidth="66.22216796875" text="%User_ID" />
         </columns>
       </TableView>
-      <Button layoutX="787.0" layoutY="88.0" mnemonicParsing="false" onAction="#addAppointmentButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #15d418;" text="%addAppointmentButton" textAlignment="CENTER" wrapText="true">
+      <Button layoutX="994.0" layoutY="89.0" mnemonicParsing="false" onAction="#addAppointmentButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #15d418;" text="%addAppointmentButton" textAlignment="CENTER" wrapText="true">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Button>
-      <Button layoutX="787.0" layoutY="208.0" mnemonicParsing="false" onAction="#deleteAppointmentButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #fc3003;" text="%deleteAppointmentButton" textAlignment="CENTER" wrapText="true">
+      <Button layoutX="994.0" layoutY="209.0" mnemonicParsing="false" onAction="#deleteAppointmentButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #fc3003;" text="%deleteAppointmentButton" textAlignment="CENTER" wrapText="true">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Button>
-      <Button layoutX="787.0" layoutY="619.0" mnemonicParsing="false" onAction="#logoutButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #ebeb07;" text="%backButton" textAlignment="CENTER" wrapText="true">
+      <Button layoutX="994.0" layoutY="620.0" mnemonicParsing="false" onAction="#logoutButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #ebeb07;" text="%backButton" textAlignment="CENTER" wrapText="true">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Button>
-      <Button layoutX="787.0" layoutY="147.0" mnemonicParsing="false" onAction="#updateAppointmentButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #15d487;" text="%updateAppointmentButton" textAlignment="CENTER" wrapText="true">
+      <Button layoutX="994.0" layoutY="148.0" mnemonicParsing="false" onAction="#updateAppointmentButtonAction" prefHeight="42.0" prefWidth="106.0" style="-fx-background-color: #15d487;" text="%updateAppointmentButton" textAlignment="CENTER" wrapText="true">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Button>
-      <TextField fx:id="searchBar" layoutX="598.0" layoutY="45.0" prefHeight="25.0" prefWidth="295.0" promptText="%searchBarPrompt" />
+      <TextField fx:id="searchBar" layoutX="805.0" layoutY="18.0" prefHeight="25.0" prefWidth="295.0" promptText="%searchBarPrompt" />
       <GridPane layoutX="14.0" layoutY="14.0" prefHeight="35.0" prefWidth="499.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -71,6 +72,8 @@
             <Font name="System Bold Italic" size="24.0" />
          </font>
       </Label>
-      <Label fx:id="messageLabel" layoutX="262.0" layoutY="49.0" prefHeight="35.0" prefWidth="326.0" text="Label" wrapText="true" />
+      <Label fx:id="messageLabel" layoutX="262.0" layoutY="49.0" prefHeight="35.0" prefWidth="487.0" text="Label" wrapText="true" />
+      <DatePicker fx:id="filterDatePicker" layoutX="805.0" layoutY="54.0" onAction="#filterTableByDate" prefHeight="25.0" prefWidth="171.0" promptText="%filter" />
+      <Button layoutX="994.0" layoutY="54.0" mnemonicParsing="false" onAction="#helperInfo" style="-fx-background-color: #4CE4B6;" text="%helper" />
    </children>
 </AnchorPane>
